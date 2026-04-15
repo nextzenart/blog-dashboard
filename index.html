@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>꿈꾸는소년 블로그 자동 포스팅 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh}
+.W{max-width:640px;margin:0 auto;padding:16px}
+.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.hd h1{font-size:18px;font-weight:700}
+.hd small{color:#666;font-size:11px;display:block;margin-top:2px}
+.hd input[type=date]{background:#1a1a24;border:1px solid #333;border-radius:10px;padding:4px 10px;color:#ccc;font-size:12px}
+.ut{color:#444;font-size:10px;text-align:right;margin-top:4px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.sc{background:#12121a;border:1px solid #1e1e2e;border-radius:16px;padding:14px}
+.sc .lb{color:#888;font-size:11px;margin-bottom:4px}
+.sc .vl{font-size:28px;font-weight:700}
+.sc .sb{color:#555;font-size:10px;margin-top:2px}
+.cw{color:#fff}.cg{color:#34d399}.cr{color:#f87171}.ca{color:#fbbf24}
+.hb{background:#12121a;border:1px solid #1e1e2e;border-radius:16px;padding:14px;margin-bottom:12px}
+.hb .ti{color:#888;font-size:11px;margin-bottom:10px}
+.hs{display:flex;align-items:flex-end;gap:3px;height:70px}
+.hc{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.hf{width:100%;border-radius:2px;transition:height .3s;min-height:2px}
+.hl{font-size:8px;color:#444}
+.wk{background:#12121a;border:1px solid #1e1e2e;border-radius:16px;padding:14px;margin-bottom:12px}
+.wk .ti{color:#888;font-size:11px;margin-bottom:10px}
+.wr{display:flex;gap:6px}
+.wd{flex:1;text-align:center;padding:8px 4px;border-radius:12px;cursor:pointer;transition:background .2s}
+.wd:hover{background:#1a1a28}
+.wd.ac{background:#1a1a28;outline:1px solid #444}
+.wd .dw{font-size:10px;color:#555}
+.wd .nm{font-size:14px;font-weight:700;color:#34d399}
+.wd .er{font-size:10px;color:#f87171}
+.pt{color:#888;font-size:11px;margin-bottom:8px}
+.pi{background:#12121a;border:1px solid #1e1e2e;border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.pi .nf{flex:1;min-width:0}
+.pi .nf p{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi .nf small{font-size:10px;color:#555}
+.bd{padding:2px 8px;border-radius:20px;font-size:10px;border:1px solid}
+.bs{background:#34d39920;color:#34d399;border-color:#34d39940}
+.bf{background:#f8717120;color:#f87171;border-color:#f8717140}
+.be{background:#fbbf2420;color:#fbbf24;border-color:#fbbf2440}
+.em{background:#12121a;border:1px solid #1e1e2e;border-radius:16px;padding:40px;text-align:center;color:#555;font-size:13px}
+.ft{text-align:center;color:#333;font-size:10px;margin-top:32px}
+.lv{display:inline-flex;align-items:center;gap:4px}
+.ld{width:6px;height:6px;border-radius:50%;background:#34d399;animation:pu 2s infinite}
+@keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+<div class="W">
+<div class="hd">
+<div><h1>꿈꾸는소년 <span class="lv"><span class="ld"></span></span></h1><small>블로그 자동 포스팅 대시보드</small></div>
+<div style="text-align:right"><input type="date" id="dp"><div class="ut" id="ut"></div></div>
+</div>
+<div class="sg" id="sg"></div>
+<div class="hb"><div class="ti">시간대별 포스팅</div><div class="hs" id="hB"></div></div>
+<div class="wk"><div class="ti">최근 7일</div><div class="wr" id="wR"></div></div>
+<div class="pt" id="pT">포스팅 기록</div>
+<div id="pL"></div>
+<div class="ft">30초마다 자동 갱신 · dream137904</div>
+</div>
+<script>
+var SU='https://waxyghuyecaoflbttkgf.supabase.co',SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndheHlnaHV5ZWNhb2ZsYnR0a2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNDUwNTUsImV4cCI6MjA5MTYyMTA1NX0.sjbJu-aU3AhMP8zgEEU6DrvpJmH4TaYBI9ou261wENo',sb=supabase.createClient(SU,SK),$=function(i){return document.getElementById(i)},td=function(){return new Date().toISOString().split('T')[0]},sel=td();
+var L={"t":"꿈꾸는소년","st":"블로그 자동 포스팅 대시보드","hr":"시간대별 포스팅","wk":"최근 7일","ps":"포스팅 기록","ft":"30초마다 자동 갱신","tt":"전체","ok":"성공","fl":"실패","rt":"성공률","tg":"/ 100건 목표","wt":"포스팅 데이터 대기 중...","nd":"해당 날짜에 데이터 없음","si":"시","cn":"건","rf":"갱신","er":"오류"};
+$('dp').value=sel;$('dp').addEventListener('change',function(e){sel=e.target.value;go()});
+function cd(l,v,s,c){return'<div class="sc"><div class="lb">'+l+'</div><div class="vl '+c+'">'+v+'</div>'+(s?'<div class="sb">'+s+'</div>':'')+'</div>'}
+async function go(){
+var r1=await sb.from('blog_posts').select('*').gte('posted_at',sel+'T00:00:00+09:00').lt('posted_at',sel+'T23:59:59+09:00').order('posted_at',{ascending:false});
+var r2=await sb.from('blog_daily_stats').select('*').order('date',{ascending:false}).limit(7);
+var p=r1.data||[],w=(r2.data||[]).reverse();
+var ok=p.filter(function(x){return x.status==='success'}).length,fl=p.filter(function(x){return x.status==='failed'}).length,er=p.filter(function(x){return x.status==='error'}).length,rt=p.length>0?Math.round(ok/p.length*100):0,rc=rt>=80?'cg':rt>=50?'ca':'cr';
+$('sg').innerHTML=[cd(L.tt,p.length,L.tg,'cw'),cd(L.ok,ok,'','cg'),cd(L.fl,fl+er,'',fl+er>0?'cr':'cw'),cd(L.rt,rt+'%','',rc)].join('');
+var bh={};p.forEach(function(x){var h=new Date(x.posted_at).getHours();if(!bh[h])bh[h]={s:0,f:0};x.status==='success'?bh[h].s++:bh[h].f++});
+var mx=Math.max.apply(null,Object.values(bh).map(function(v){return v.s+v.f}).concat([1])),bH='';
+for(var h=8;h<=23;h++){var d=bh[h]||{s:0,f:0},t=d.s+d.f,pc=t>0?Math.max(t/mx*100,8):0,co=t===0?'#1e1e2e':d.f>0?'#fbbf2490':'#34d39980';bH+='<div class="hc"><div class="hf" style="height:'+(pc||2)+'%;background:'+co+'" title="'+h+L.si+': '+t+L.cn+'"></div><span class="hl">'+h+'</span></div>'}
+$('hB').innerHTML=bH;
+$('wR').innerHTML=w.map(function(d){var dw=new Date(d.date+'T00:00:00').toLocaleDateString('ko-KR',{weekday:'short'}),ac=d.date===sel?' ac':'',eh=(d.failed+d.error)>0?'<div class="er">-'+(d.failed+d.error)+'</div>':'';return'<div class="wd'+ac+'" onclick="sel=\''+d.date+'\';$(\'dp\').value=\''+d.date+'\';go()"><div class="dw">'+dw+'</div><div class="nm">'+d.success+'</div>'+eh+'</div>'}).join('');
+$('pT').textContent=L.ps+(p.length>0?' ('+p.length+L.cn+')':'');
+if(p.length===0){$('pL').innerHTML='<div class="em">'+(sel===td()?L.wt:L.nd)+'</div>'}
+else{$('pL').innerHTML=p.map(function(x){var tm=new Date(x.posted_at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'}),bg=x.status==='success'?'bs':x.status==='failed'?'bf':'be',sl=x.status==='success'?L.ok:x.status==='failed'?L.fl:L.er,su=[tm,x.category,x.error_msg].filter(Boolean).join(' \u00B7 ');return'<div class="pi"><div class="nf"><p>'+(x.title||x.topic)+'</p><small>'+su+'</small></div><span class="bd '+bg+'">'+sl+'</span></div>'}).join('')}
+$('ut').textContent=new Date().toLocaleTimeString('ko-KR')+' '+L.rf}
+go();setInterval(go,30000);
+</script>
+</body>
+</html>
