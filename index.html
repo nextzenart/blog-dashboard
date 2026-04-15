@@ -2,12 +2,18 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>꿈꾸는소년 블로그 자동 포스팅 대시보드</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="꿈꾸는소년">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.svg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;color:#e5e5e5;min-height:100vh;padding-top:env(safe-area-inset-top)}
 .W{max-width:640px;margin:0 auto;padding:16px}
 .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
 .hd h1{font-size:18px;font-weight:700}
@@ -45,7 +51,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;
 .bf{background:#f8717120;color:#f87171;border-color:#f8717140}
 .be{background:#fbbf2420;color:#fbbf24;border-color:#fbbf2440}
 .em{background:#12121a;border:1px solid #1e1e2e;border-radius:16px;padding:40px;text-align:center;color:#555;font-size:13px}
-.ft{text-align:center;color:#333;font-size:10px;margin-top:32px}
+.ft{text-align:center;color:#333;font-size:10px;margin-top:32px;padding-bottom:env(safe-area-inset-bottom)}
 .lv{display:inline-flex;align-items:center;gap:4px}
 .ld{width:6px;height:6px;border-radius:50%;background:#34d399;animation:pu 2s infinite}
 @keyframes pu{0%,100%{opacity:1}50%{opacity:.3}}
@@ -65,15 +71,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,sans-serif;background:#0a0a0f;
 <div class="ft">30초마다 자동 갱신 · dream137904</div>
 </div>
 <script>
+// Service Worker + PWA
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}
+
 var SU='https://waxyghuyecaoflbttkgf.supabase.co',SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndheHlnaHV5ZWNhb2ZsYnR0a2dmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNDUwNTUsImV4cCI6MjA5MTYyMTA1NX0.sjbJu-aU3AhMP8zgEEU6DrvpJmH4TaYBI9ou261wENo',sb=supabase.createClient(SU,SK),$=function(i){return document.getElementById(i)},td=function(){return new Date().toISOString().split('T')[0]},sel=td();
 var L={"t":"꿈꾸는소년","st":"블로그 자동 포스팅 대시보드","hr":"시간대별 포스팅","wk":"최근 7일","ps":"포스팅 기록","ft":"30초마다 자동 갱신","tt":"전체","ok":"성공","fl":"실패","rt":"성공률","tg":"/ 100건 목표","wt":"포스팅 데이터 대기 중...","nd":"해당 날짜에 데이터 없음","si":"시","cn":"건","rf":"갱신","er":"오류"};
 $('dp').value=sel;$('dp').addEventListener('change',function(e){sel=e.target.value;go()});
 function cd(l,v,s,c){return'<div class="sc"><div class="lb">'+l+'</div><div class="vl '+c+'">'+v+'</div>'+(s?'<div class="sb">'+s+'</div>':'')+'</div>'}
+
+// Badge: update app icon badge with issue count
+function updateBadge(count){
+  if(navigator.setAppBadge){
+    if(count>0) navigator.setAppBadge(count);
+    else navigator.clearAppBadge();
+  }
+  // Also tell SW
+  if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+    navigator.serviceWorker.controller.postMessage({type:'SET_BADGE',count:count});
+  }
+}
+
 async function go(){
 var r1=await sb.from('blog_posts').select('*').gte('posted_at',sel+'T00:00:00+09:00').lt('posted_at',sel+'T23:59:59+09:00').order('posted_at',{ascending:false});
 var r2=await sb.from('blog_daily_stats').select('*').order('date',{ascending:false}).limit(7);
 var p=r1.data||[],w=(r2.data||[]).reverse();
 var ok=p.filter(function(x){return x.status==='success'}).length,fl=p.filter(function(x){return x.status==='failed'}).length,er=p.filter(function(x){return x.status==='error'}).length,rt=p.length>0?Math.round(ok/p.length*100):0,rc=rt>=80?'cg':rt>=50?'ca':'cr';
+
+// Update badge with issue count (failed + error)
+updateBadge(fl+er);
+
 $('sg').innerHTML=[cd(L.tt,p.length,L.tg,'cw'),cd(L.ok,ok,'','cg'),cd(L.fl,fl+er,'',fl+er>0?'cr':'cw'),cd(L.rt,rt+'%','',rc)].join('');
 var bh={};p.forEach(function(x){var h=new Date(x.posted_at).getHours();if(!bh[h])bh[h]={s:0,f:0};x.status==='success'?bh[h].s++:bh[h].f++});
 var mx=Math.max.apply(null,Object.values(bh).map(function(v){return v.s+v.f}).concat([1])),bH='';
